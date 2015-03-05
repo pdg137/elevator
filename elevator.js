@@ -18,12 +18,14 @@
     upPressedFunction = function(floor) {
       return function() {
         upPressed[floor.floorNum()] = true
+        checkElevatorsIdle()
       }
     }
 
     downPressedFunction = function(floor) {
       return function() {
         downPressed[floor.floorNum()] = true
+        checkElevatorsIdle()
       }
     }
 
@@ -76,15 +78,36 @@
       }
     }
 
+    checkElevatorsIdle = function() {
+      for(var i = 0; i < elevators.length; i++) {
+        if(elevators[i].destinationQueue.length == 0)
+          elevatorIdleFunction(elevator)()
+      }
+    }
+
     elevatorIdleFunction = function(elevator) {
       return function() {
-
         if(elevator.getPressedFloors().length > 0) {
           goToFloorNum(elevator, elevator.getPressedFloors()[0])
           return
         }
 
-        for(var i = 0 ; i < floors.length; i++) {
+        var start = 0
+        var end = floors.length-1
+        if(elevator == elevators[0]) {
+          start = 0
+          end = 0
+        }
+        if(elevator == elevators[1]) {
+          start = Math.floor(floors.length/2)
+          end = floors.length-1
+        }
+        if(elevator == elevators[2]) {
+          start = 1
+          end = Math.floor(floors.length/2)-1
+        }
+
+        for(var i = start ; i < end; i++) {
           if(upPressed[i]) {
             goToFloorNum(elevator, i);
             return
@@ -94,7 +117,7 @@
             return
           }
         }
-
+        goToFloorNum(elevator, end)
       }
     }
 
